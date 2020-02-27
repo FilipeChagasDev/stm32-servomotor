@@ -39,38 +39,34 @@ void servo_set_offset(servo_t *handler, float angle_deg)
 
 float servo_duty_ms(float angle_deg)
 {
-    /*  angle_deg per-one of 180deg:
-               180/angle_deg = 1/y
-            -> angle_deg/180 = y
+    /*  
+       180            2ms
+    --------   =   ----------
+    angle_deg       duty_ms
 
-        duty_ms por_one of 1ms:
-               1/duty_ms = 1/z
-            -> duty_ms = z
+                angle_deg
+    duty_ms =   --------- 
+                   90
 
-        duty_ms from angle_deg:
-               angle_deg/180 = z
-            -> angle_deg/180 = duty_ms
+    0.5ms -> 0deg
+    2.5ms -> 180deg
     */
 
-   return 1.0 + angle_deg / 180.0;
+    return 0.5 + angle_deg / 90.0;
 }
 
 void servo_set_position(servo_t *handler, float angle_deg)
 {
-    /*  duty_ms per-one of 20ms:
-               20/duty_ms = 1/x
-            -> x = duty_ms/20
+    /*
+    duty_ms      duty_16
+    ------- =  ----------- 
+      20ms     max_duty_16
 
-        duty_16 per-one of max_duty_16:
-               max_duty_16/duty_16 = 1/y
-            -> duty_16/max_duty_16 = y
-
-        calc duty_16 from duty_ms:
-               duty_16/max_duty_16 = x
-            -> duty_16 = x * max_duty_16
-            -> duty_16 = (duty_ms/20) * max_duty_16
-            -> duty_16 = (duty_ms * max_duty_16) / 20
+                             duty_ms
+    duty_16 = max_duty_16 * ----------
+                              20ms 
     */
+
     angle_deg += handler->offset;
 
     float max_duty_16 = handler->htim->Instance->ARR;
