@@ -29,14 +29,15 @@ typedef enum {SERVO_STATUS_OK, SERVO_STATUS_ERROR } servo_status_t;
 
 servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel);
 
-servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr);
-
-servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz);
-
 void servo_set_offset(servo_t *handler, float angle_deg);
 
 float servo_duty_ms(float angle_deg);
 
 void servo_set_position(servo_t *handler, float angle_deg);
+
+#if 0
+servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr);
+servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz);
+#endif
 
 #endif

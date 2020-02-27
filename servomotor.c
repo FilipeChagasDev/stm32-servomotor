@@ -31,43 +31,6 @@ servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t ch
     else return SERVO_STATUS_ERROR;
 }
 
-servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr)
-{
-    /*  Rule 1: (apb_freq_hz / 50hz) most be equal to ( PSC * ARR ) 
-                to generate the 20ms pwm period.
-
-        Rule 2: ARR value most be higher as possible and PSC value most be lower as possible.
-    */
-
-    unsigned long psc_arr = apb_freq_hz / 50;
-
-    uint16_t psc_tmp;
-    uint16_t arr_tmp;
-    
-    for(arr_tmp = 0xFFFF; arr_tmp > 0; arr_tmp--)
-    {
-        for(psc_tmp = 1; psc_tmp <=  0xFFFF; psc_tmp++)
-        {
-            if(psc_tmp * arr_tmp == psc_arr)
-            {
-                *psc = psc_tmp;
-                *arr = arr_tmp;
-                return SERVO_STATUS_OK;
-            }
-        }
-    }
-
-    return SERVO_STATUS_ERROR;
-}
-
-servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz)
-{
-    uint16_t psc, arr;
-    if(servo_psc_arr_calc(apb_freq_hz, &psc, &arr) == SERVO_STATUS_ERROR) return SERVO_STATUS_ERROR;
-    handler->htim->Instance->PSC = psc;
-    handler->htim->Instance->ARR = psc;
-    return SERVO_STATUS_OK;
-}
 
 void servo_set_offset(servo_t *handler, float angle_deg)
 {
@@ -143,3 +106,46 @@ void servo_set_position(servo_t *handler, float angle_deg)
         handler->htim->Instance->CCR4 = ccr;
     }
 }
+
+
+#if 0
+
+servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr)
+{
+    /*  Rule 1: (apb_freq_hz / 50hz) most be equal to ( PSC * ARR ) 
+                to generate the 20ms pwm period.
+
+        Rule 2: ARR value most be higher as possible and PSC value most be lower as possible.
+    */
+
+    unsigned long psc_arr = apb_freq_hz / 50;
+
+    uint16_t psc_tmp;
+    uint16_t arr_tmp;
+    
+    for(arr_tmp = 0xFFFF; arr_tmp > 0; arr_tmp--)
+    {
+        for(psc_tmp = 1; psc_tmp <=  0xFFFF; psc_tmp++)
+        {
+            if(psc_tmp * arr_tmp == psc_arr)
+            {
+                *psc = psc_tmp;
+                *arr = arr_tmp;
+                return SERVO_STATUS_OK;
+            }
+        }
+    }
+
+    return SERVO_STATUS_ERROR;
+}
+
+servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz)
+{
+    uint16_t psc, arr;
+    if(servo_psc_arr_calc(apb_freq_hz, &psc, &arr) == SERVO_STATUS_ERROR) return SERVO_STATUS_ERROR;
+    handler->htim->Instance->PSC = psc;
+    handler->htim->Instance->ARR = psc;
+    return SERVO_STATUS_OK;
+}
+
+#endif
