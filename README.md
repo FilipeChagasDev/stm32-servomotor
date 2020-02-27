@@ -1,7 +1,7 @@
 # STM32 Servomotor library
-⚙️ Servomotor control library for STM32 microcontrollers with CubeMX generated HAL
+Servomotor control library for STM32 microcontrollers with CubeMX generated HAL
 
-![Version](https://img.shields.io/badge/Version-v1.0.0-green)
+![Version](https://img.shields.io/badge/Version-v1.1.0-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 # Documentation
@@ -14,12 +14,38 @@ It is recommended to use **STM32CubeMX** to configure the timers settings.
 
 When doing this, you must define in the timers a PWM generation channel for each servomotor.
 
-You should check the frequency of the APB clock used by the timer. To find out which APB clock is used by the timer you have chosen, see your microcontroller datasheet.
+You should check the frequency of the **APB** clock used by the timer. To find out which **APB** clock is used by the timer you have chosen, see your microcontroller datasheet.
 
-Use the **timercalc.py** python script to calculate the timer's Prescaler (PSC) and Counter Period (ARR) values.
+Use the **servocalc.py** python script to calculate the timer's **Prescaler (PSC)** and Counter **Period (ARR)** values.
 
-Wrong settings will cause servomotors to not work.
+**Wrong settings will cause servomotors to not work.**
 
 # HAL headers
 
-if necessary, change *#include<stm32f1xx_hal.h>* in the **servomotor.h** file to the HAL header of your microcontroller.
+The library's dependency includes need to be included in your project's **main.h** file. Are they:
+
+* The ...**_hal.h** header
+* The ...**_hal_tim.h** header (for timers)
+
+```C
+/* For stm32f0xx */
+#include <stm32f0xx_hal.h>
+#include <stm32f0xx_hal_tim.h>
+   
+/* For stm32f1xx */
+#include <stm32f1xx_hal.h>
+#include <stm32f1xx_hal_tim.h>
+    
+/* For stm32f2xx */
+#include <stm32f2xx_hal.h>
+#include <stm32f2xx_hal_tim.h>
+    
+/* For stm32f3xx */
+#include <stm32f3xx_hal.h>
+#include <stm32f3xx_hal_tim.h>
+    
+/* For stm32f4xx */
+#include <stm32f4xx_hal.h>
+#include <stm32f4xx_hal_tim.h>
+
+```

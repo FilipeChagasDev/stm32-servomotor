@@ -36,10 +36,36 @@
 
 #include <stdint.h>
 
-#ifdef SERVOMOTOR_USE_MAIN_HEADER
-    #include <main.h>
-#else
+/* --------------------------------------------------------------- */
+/* IMPORTANT: Paste these includes into your project's main.h file */
+#if 0
+    /* For stm32f0xx */
+    #include <stm32f0xx_hal.h>
+    #include <stm32f0xx_hal_tim.h>
+
+   
+    /* For stm32f1xx */
     #include <stm32f1xx_hal.h>
+    #include <stm32f1xx_hal_tim.h>
+
+    
+    /* For stm32f2xx */
+    #include <stm32f2xx_hal.h>
+    #include <stm32f2xx_hal_tim.h>
+
+    
+    /* For stm32f3xx */
+    #include <stm32f3xx_hal.h>
+    #include <stm32f3xx_hal_tim.h>
+
+    
+    /* For stm32f4xx */
+    #include <stm32f4xx_hal.h>
+    #include <stm32f4xx_hal_tim.h>
+
+/* --------------------------------------------------------------- */
+#else
+    #include <main.h>
 #endif
 
 #ifndef KHZ
