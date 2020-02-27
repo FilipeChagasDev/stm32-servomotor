@@ -2,38 +2,32 @@
 
 servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel)
 {
+    if(handler == NULL) return SERVO_STATUS_ERROR;
+
     handler->htim = htim;
     handler->channel = channel;
     handler->offset = 0;
+    handler->min = 0;
+    handler->max = 170;
 
-    switch (channel)
-    {
-    case TIM_CHANNEL_1:
-        handler->htim->Instance->CCR1 = 0;
-        break;
-    case TIM_CHANNEL_2:
-        handler->htim->Instance->CCR2 = 0;
-        break;
-    case TIM_CHANNEL_3:
-        handler->htim->Instance->CCR3 = 0;
-        break;
-    case TIM_CHANNEL_4:
-        handler->htim->Instance->CCR4 = 0;
-        break;
-    default:
-        handler->htim->Instance->CCR1 = 0;
-        handler->htim->Instance->CCR2 = 0;
-        handler->htim->Instance->CCR3 = 0;
-        handler->htim->Instance->CCR4 = 0;
-    }
+    if(HAL_TIM_PWM_Start(htim, channel) != HAL_OK) return SERVO_STATUS_ERROR;
+    servo_set_position(handler, 0);
 
-    if(HAL_TIM_PWM_Start(htim, channel) == HAL_OK) return SERVO_STATUS_OK;
-    else return SERVO_STATUS_ERROR;
+    return SERVO_STATUS_OK;
 }
 
+void servo_set_limit(servo_t *handler, float min, float max)
+{
+    if(handler == NULL) return;
+
+    handler->min = min;
+    handler->max = max;
+}
 
 void servo_set_offset(servo_t *handler, float angle_deg)
 {
+    if(handler == NULL) return;
+
     handler->offset = angle_deg;
 }
 
@@ -67,18 +61,19 @@ void servo_set_position(servo_t *handler, float angle_deg)
                               20ms 
     */
 
+    if(handler == NULL) return;
+
     angle_deg += handler->offset;
+    angle_deg = ( angle_deg > handler->max ? handler->max : 
+                    ( angle_deg < handler->min ? handler->min : angle_deg )
+                );
 
     float max_duty_16 = handler->htim->Instance->ARR;
     float duty_ms = servo_duty_ms(angle_deg);
     float duty_16 = (duty_ms * max_duty_16)/ 20.0;
 
-    uint16_t ccr = ( (int32_t)duty_16 > 0xFFFF ? 
-                    0xFFFF
-                    :  ( (int32_t)duty_16 < 0 ?
-                        0 
-                        :  (uint16_t)duty_16
-                       ) 
+    uint16_t ccr = ( (int32_t)duty_16 > 0xFFFF ? 0xFFFF :  
+                     ( (int32_t)duty_16 < 0 ? 0 : (uint16_t)duty_16 ) 
                    );
 
     switch (handler->channel)
@@ -105,6 +100,8 @@ void servo_set_position(servo_t *handler, float angle_deg)
 
 void servo_sweep(servo_t *handler, float start_angle_deg, float end_angle_deg, float step, uint32_t step_delay_ms)
 {
+    if(handler == NULL) return;
+
     float i = start_angle_deg;
 
     while (i < end_angle_deg)

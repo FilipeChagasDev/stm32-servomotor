@@ -23,11 +23,15 @@ typedef struct
     TIM_HandleTypeDef *htim;
     uint32_t channel;
     float offset;
+    float min;
+    float max;
 }servo_t;
 
 typedef enum {SERVO_STATUS_OK, SERVO_STATUS_ERROR } servo_status_t; 
 
 servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel);
+
+void servo_set_limit(servo_t *handler, float min, float max);
 
 void servo_set_offset(servo_t *handler, float angle_deg);
 
