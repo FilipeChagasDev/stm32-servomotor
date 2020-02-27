@@ -107,6 +107,27 @@ void servo_set_position(servo_t *handler, float angle_deg)
     }
 }
 
+void servo_sweep(servo_t *handler, float start_angle_deg, float end_angle_deg, float step, uint32_t step_delay_ms)
+{
+    float i = start_angle_deg;
+
+    while (i < end_angle_deg)
+    {
+        servo_set_position(handler, i);
+        i += step;
+        i = (i > end_angle_deg ? end_angle_deg : i);
+        HAL_Delay(step_delay_ms);
+    }
+
+    while (i > start_angle_deg)
+    {
+        servo_set_position(handler, i);
+        i -= step;
+        i = (i < start_angle_deg ? start_angle_deg : i);
+        HAL_Delay(step_delay_ms);
+    }
+    
+}
 
 #if 0
 
