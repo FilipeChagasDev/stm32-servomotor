@@ -1,3 +1,36 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2020 Filipe Chagas
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/**
+ * @file servomotor.c
+ * @author Filipe Chagas
+ * @date 27 / 02 / 2020
+ * @brief Servomotor library for STM32 with CubeMX generated HAL
+ *
+ * @see https://github.com/FilipeChagasDev/stm32-servomotor
+ */
+
 #include "servomotor.h"
 
 servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel)
@@ -100,7 +133,7 @@ void servo_set_position(servo_t *handler, float angle_deg)
 
 void servo_sweep(servo_t *handler, float start_angle_deg, float end_angle_deg, float step, uint32_t step_delay_ms)
 {
-    if(handler == NULL) return;
+    if(handler == NULL || start_angle_deg >= end_angle_deg || step < 1) return;
 
     float i = start_angle_deg;
 
@@ -109,7 +142,7 @@ void servo_sweep(servo_t *handler, float start_angle_deg, float end_angle_deg, f
         servo_set_position(handler, i);
         i += step;
         i = (i > end_angle_deg ? end_angle_deg : i);
-        HAL_Delay(step_delay_ms);
+        if(step_delay_ms > 0) HAL_Delay(step_delay_ms);
     }
 
     while (i > start_angle_deg)
@@ -117,49 +150,7 @@ void servo_sweep(servo_t *handler, float start_angle_deg, float end_angle_deg, f
         servo_set_position(handler, i);
         i -= step;
         i = (i < start_angle_deg ? start_angle_deg : i);
-        HAL_Delay(step_delay_ms);
+        if(step_delay_ms > 0) HAL_Delay(step_delay_ms);
     }
     
 }
-
-#if 0
-
-servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr)
-{
-    /*  Rule 1: (apb_freq_hz / 50hz) most be equal to ( PSC * ARR ) 
-                to generate the 20ms pwm period.
-
-        Rule 2: ARR value most be higher as possible and PSC value most be lower as possible.
-    */
-
-    unsigned long psc_arr = apb_freq_hz / 50;
-
-    uint16_t psc_tmp;
-    uint16_t arr_tmp;
-    
-    for(arr_tmp = 0xFFFF; arr_tmp > 0; arr_tmp--)
-    {
-        for(psc_tmp = 1; psc_tmp <=  0xFFFF; psc_tmp++)
-        {
-            if(psc_tmp * arr_tmp == psc_arr)
-            {
-                *psc = psc_tmp;
-                *arr = arr_tmp;
-                return SERVO_STATUS_OK;
-            }
-        }
-    }
-
-    return SERVO_STATUS_ERROR;
-}
-
-servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz)
-{
-    uint16_t psc, arr;
-    if(servo_psc_arr_calc(apb_freq_hz, &psc, &arr) == SERVO_STATUS_ERROR) return SERVO_STATUS_ERROR;
-    handler->htim->Instance->PSC = psc;
-    handler->htim->Instance->ARR = psc;
-    return SERVO_STATUS_OK;
-}
-
-#endif
