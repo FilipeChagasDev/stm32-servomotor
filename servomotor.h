@@ -27,7 +27,7 @@ typedef struct
 
 typedef enum {SERVO_STATUS_OK, SERVO_STATUS_ERROR } servo_status_t; 
 
-void servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel);
+servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t channel);
 
 servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint16_t *arr);
 
