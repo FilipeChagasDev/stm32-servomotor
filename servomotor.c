@@ -5,6 +5,28 @@ servo_status_t servo_init(servo_t *handler, TIM_HandleTypeDef *htim, uint32_t ch
     handler->htim = htim;
     handler->channel = channel;
     handler->offset = 0;
+
+    switch (channel)
+    {
+    case TIM_CHANNEL_1:
+        handler->htim->Instance->CCR1 = 0;
+        break;
+    case TIM_CHANNEL_2:
+        handler->htim->Instance->CCR2 = 0;
+        break;
+    case TIM_CHANNEL_3:
+        handler->htim->Instance->CCR3 = 0;
+        break;
+    case TIM_CHANNEL_4:
+        handler->htim->Instance->CCR4 = 0;
+        break;
+    default:
+        handler->htim->Instance->CCR1 = 0;
+        handler->htim->Instance->CCR2 = 0;
+        handler->htim->Instance->CCR3 = 0;
+        handler->htim->Instance->CCR4 = 0;
+    }
+
     if(HAL_TIM_PWM_Start(htim, channel) == HAL_OK) return SERVO_STATUS_OK;
     else return SERVO_STATUS_ERROR;
 }
@@ -36,6 +58,15 @@ servo_status_t servo_psc_arr_calc(unsigned long apb_freq_hz, uint16_t *psc, uint
     }
 
     return SERVO_STATUS_ERROR;
+}
+
+servo_status_t servo_config_psc_arr(servo_t *handler, unsigned long apb_freq_hz)
+{
+    uint16_t psc, arr;
+    if(servo_psc_arr_calc(apb_freq_hz, &psc, &arr) == SERVO_STATUS_ERROR) return SERVO_STATUS_ERROR;
+    handler->htim->Instance->PSC = psc;
+    handler->htim->Instance->ARR = psc;
+    return SERVO_STATUS_OK;
 }
 
 void servo_set_offset(servo_t *handler, float angle_deg)
